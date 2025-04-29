@@ -165,12 +165,14 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
+        
         if beam is not None:
             if bomb is not None:
                 if beam.rct.colliderect(bomb.rct):
                     # ビームと爆弾
                     beam = None #  ビームを消す
                     bomb = None #  爆弾を消す
+                    bird.change_img(6, screen)
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
