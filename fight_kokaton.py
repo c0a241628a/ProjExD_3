@@ -159,6 +159,38 @@ class Score:
         """
         self.img = self.fonto.render(f"スコア:{self.ten}", 0,self.iro)
         screen.blit(self.img, self.img_rct)
+        
+class Explosion:
+    """
+    爆発に関するクラス
+    """
+    def __init__(self,center: tuple[int, int]):
+        """
+        爆破画像Surfaceを生成する
+        座標を設定
+        爆破の位置center
+        表示時間lifeを設定
+        """
+        omote = pg.image.load(f"fig/explosion.gif")
+        ura = pg.image.load(f"fig/explosion.gif")
+        ura=pg.transform.flip(ura, True, True)
+        self.images = [omote, ura]
+        self.image = self.images[0]
+        self.rct = self.image.get_rect(center=center)
+        self.life = 100
+
+    def update(self, screen: pg.Surface):
+        """
+        爆発経過時間lifeを1減算
+        爆発経過時間lifeが正ならSurfaceリストを交互に切り替えて爆発を演出
+        引数 screen：画面Surface
+        """
+        if self.life>0:
+            self.life -= 1
+            self.image = self.images[self.life // 10%2]
+            screen.blit(self.image, self.rct)
+                
+
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -169,6 +201,7 @@ def main():
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     score=Score()
     beams=[]
+    explosions = []
     #bombs = []
     #for i in range(NUM_OF_BOMBS):
     #    bombs.append(Bomb((255, 0, 0), 10))
@@ -206,11 +239,14 @@ def main():
                     score.ten += 1
                     score.update(screen)
                     pg.display.update()
+                    explosions.append(Explosion(bomb.rct.center))  # 爆発座標を渡す
                 beams = [beam for beam in beams if beam is not None]
             bombs = [bomb for bomb in bombs if bomb is not None]
-        
-                
-                
+            
+        explosions = [ex for ex in explosions if ex.life > 0]
+        for ex in explosions:
+            if ex.life > 0:
+                ex.update(screen)
             
 
         key_lst = pg.key.get_pressed()
