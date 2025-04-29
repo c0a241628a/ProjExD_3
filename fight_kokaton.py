@@ -7,6 +7,7 @@ import pygame as pg
 
 WIDTH = 1100  # ゲームウィンドウの幅
 HEIGHT = 650  # ゲームウィンドウの高さ
+NUM_OF_BOMBS = 5 #  爆弾の個数
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -145,7 +146,11 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200)) #  初期座標
-    bomb = Bomb((255, 0, 0), 10)
+    #bomb = Bomb((255, 0, 0), 10)
+    bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
+    #bombs = []
+    #for i in range(NUM_OF_BOMBS):
+    #    bombs.append(Bomb((255, 0, 0), 10))
     beam = None
     clock = pg.time.Clock()
     tmr = 0
@@ -158,7 +163,7 @@ def main():
                 beam = Beam(bird)
         screen.blit(bg_img, [0, 0])
         
-        if bomb is not None: #  の前に
+        for bomb in bombs: #  の前に
             if bird.rct.colliderect(bomb.rct):
                 # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる(爆弾と鳥),あと簡易画面を出す
                 bird.change_img(8, screen)
@@ -169,19 +174,20 @@ def main():
                 time.sleep(1)
                 return
         
-        if beam is not None:
-            if bomb is not None:
-                if beam.rct.colliderect(bomb.rct):
+            for j,bomb in enumerate(bombs):
+                if beam is not None:
+                    if beam.rct.colliderect(bomb.rct):
                     # ビームと爆弾
-                    beam = None #  ビームを消す
-                    bomb = None #  爆弾を消す
-                    bird.change_img(6, screen)
+                        beam = None #  ビームを消す
+                        bombs[j] = None #  爆弾を消す
+                        bird.change_img(6, screen)
+                bombs = [bomb for bomb in bombs if bomb is not None]
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         if beam is not None: #　update前に
             beam.update(screen)   
-        if bomb is not None: #　update前に
+        for bomb in bombs: #　update前に
             bomb.update(screen)
         pg.display.update()
         tmr += 1
